@@ -13,11 +13,15 @@ import { ViewModeService } from '../shared/view-mode.service';
 
 import { Planet } from './planet.schema';
 import { provideRouter } from '@angular/router';
+import { DebugElement } from '@angular/core';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 describe('PlanetsComponent', () => {
   let fixture: ComponentFixture<PlanetsComponent>;
   let http: HttpTestingController;
-  let viewModeService: ViewModeService;
+
+  let tableButton: DebugElement;
+  let gridButton: DebugElement;
 
   const planets: Planet[] = [
     {
@@ -44,7 +48,7 @@ describe('PlanetsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PlanetsComponent, PlanetsListComponent],
+      imports: [PlanetsComponent, PlanetsListComponent, NavbarComponent],
       providers: [
         provideRouter([]),
         provideHttpClient(),
@@ -56,9 +60,11 @@ describe('PlanetsComponent', () => {
 
     fixture = TestBed.createComponent(PlanetsComponent);
     http = TestBed.inject(HttpTestingController);
-    viewModeService = TestBed.inject(ViewModeService);
 
     fixture.autoDetectChanges();
+
+    tableButton = fixture.debugElement.query(By.css('#table-button'));
+    gridButton = fixture.debugElement.query(By.css('#grid-button'));
   });
 
   afterEach(() => {
@@ -66,7 +72,7 @@ describe('PlanetsComponent', () => {
   });
 
   it('should render planets table when view mode is set to "table"', () => {
-    viewModeService.setViewMode('table');
+    tableButton.nativeElement.click();
 
     const req = http.expectOne('/api/planets');
     expect(req.request.method).toBe('GET');
@@ -79,7 +85,7 @@ describe('PlanetsComponent', () => {
   });
 
   it('should render planets grid when view mode is set to "grid"', () => {
-    viewModeService.setViewMode('grid');
+    gridButton.nativeElement.click();
 
     const req = http.expectOne('/api/planets');
     expect(req.request.method).toBe('GET');
@@ -92,7 +98,7 @@ describe('PlanetsComponent', () => {
   });
 
   it('should toggle sort direction and update the arrow icon on click', () => {
-    viewModeService.setViewMode('table');
+    tableButton.nativeElement.click();
 
     const req = http.expectOne('/api/planets');
     req.flush(planets);
