@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map, switchMap } from 'rxjs';
-import { AsyncPipe, DecimalPipe, NgIf } from '@angular/common';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { PlanetsService } from '../planets.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmationService } from '../../shared/confirmation.service';
@@ -11,7 +11,7 @@ import { Planet } from '../planet.schema';
 @Component({
   selector: 'app-planet-detail',
   standalone: true,
-  imports: [NgIf, AsyncPipe, DecimalPipe],
+  imports: [AsyncPipe, DecimalPipe],
   templateUrl: './planet-detail.component.html',
   styleUrl: './planet-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,11 +1,15 @@
 <app-navbar />
 
-<ng-container *ngIf="vm$ | async as vm">
-  <app-planets-list
-    *ngIf="vm.viewMode === 'table'"
-    [planets]="vm.planets"
-    [sortDirection]="vm.sortDirection"
-    (toggleSortRadius)="onToggleSortRadius()"
-  />
-  <app-planets-grid *ngIf="vm.viewMode === 'grid'" [planets]="vm.planets" />
-</ng-container>
+@if (vm$ | async; as vm) {
+  @if (vm.viewMode === 'table') {
+    <app-planets-list
+      [planets]="vm.planets"
+      [sortDirection]="vm.sortDirection"
+      (toggleSortRadius)="onToggleSortRadius()"
+    />
+  }
+
+  @if (vm.viewMode === 'grid') {
+    <app-planets-grid [planets]="vm.planets" />
+  }
+}

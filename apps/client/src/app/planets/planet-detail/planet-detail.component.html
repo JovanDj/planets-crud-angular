@@ -1,4 +1,4 @@
-<ng-container *ngIf="planet$ | async as planet; else loading">
+@if (planet$ | async; as planet) {
   <div
     class="d-flex justify-content-between align-items-center mb-4 p-40 bg-body"
   >
@@ -81,6 +81,6 @@
       </div>
     </div>
   </div>
-</ng-container>
-
-<ng-template #loading>Loading... </ng-template>
+} @else {
+  Loading...
+}

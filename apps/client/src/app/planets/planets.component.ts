@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { combineLatestWith, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -16,7 +16,6 @@ import { NavbarComponent } from '../navbar/navbar.component';
   imports: [
     PlanetsListComponent,
     PlanetsGridComponent,
-    NgIf,
     AsyncPipe,
     NavbarComponent,
   ],

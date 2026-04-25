@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,7 +12,7 @@ import { PlanetFormComponent } from '../planets/planet-form/planet-form.componen
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [AsyncPipe, NgIf, ReactiveFormsModule],
+  imports: [AsyncPipe, ReactiveFormsModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

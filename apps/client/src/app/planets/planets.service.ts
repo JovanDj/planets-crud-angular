@@ -15,11 +15,11 @@ import { Planet, planetSchema } from './planet.schema';
 
 export type SortDirection = 'asc' | 'desc';
 
-type PlanetsState = {
+interface PlanetsState {
   readonly planets: readonly Planet[];
   readonly searchTerm: string;
   readonly sortDirection: SortDirection;
-};
+}
 
 @Injectable({ providedIn: 'root' })
 export class PlanetsService {
