@@ -1,13 +1,13 @@
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   catchError,
-  combineLatestWith,
+  distinctUntilChanged,
   map,
   tap,
   throwError,
 } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
 
 import { z, ZodError } from 'zod';
 
@@ -15,22 +15,31 @@ import { Planet, planetSchema } from './planet.schema';
 
 export type SortDirection = 'asc' | 'desc';
 
+type PlanetsState = {
+  readonly planets: readonly Planet[];
+  readonly searchTerm: string;
+  readonly sortDirection: SortDirection;
+};
+
 @Injectable({ providedIn: 'root' })
 export class PlanetsService {
   readonly #http = inject(HttpClient);
 
-  readonly #store = new BehaviorSubject<Planet[]>([]);
+  readonly #store = new BehaviorSubject<PlanetsState>({
+    planets: [],
+    searchTerm: '',
+    sortDirection: 'desc',
+  });
   readonly #state$ = this.#store.asObservable();
 
-  readonly #searchTerm = new BehaviorSubject<string>('');
-
-  readonly #sortStore = new BehaviorSubject<SortDirection>('desc');
-  readonly #sort = this.#sortStore.asObservable();
+  readonly #sortDirection$ = this.#state$.pipe(
+    map(({ sortDirection }) => sortDirection),
+    distinctUntilChanged(),
+  );
 
   readonly #filteredPlanets$ = this.#state$.pipe(
-    combineLatestWith(this.#searchTerm, this.#sortStore),
-    map(([planets, term, sort]) => {
-      const trimmed = term.trim().toLowerCase();
+    map(({ planets, searchTerm, sortDirection }) => {
+      const trimmed = searchTerm.trim().toLowerCase();
 
       const filtered = trimmed
         ? planets.filter((planet) => {
@@ -38,18 +47,18 @@ export class PlanetsService {
           })
         : planets;
 
-      return filtered.sort((a, b) => {
-        if (sort === 'asc') {
+      return [...filtered].sort((a, b) => {
+        if (sortDirection === 'asc') {
           return a.planetRadiusKM - b.planetRadiusKM;
         }
 
-        if (sort === 'desc') {
+        if (sortDirection === 'desc') {
           return b.planetRadiusKM - a.planetRadiusKM;
         }
 
         return a.id - b.id;
       });
-    })
+    }),
   );
 
   planets() {
@@ -57,13 +66,16 @@ export class PlanetsService {
   }
 
   sortDirection() {
-    return this.#sort;
+    return this.#sortDirection$;
   }
 
   fetchPlanets() {
     return this.#http.get<unknown>('/api/planets').pipe(
       map((planets) => {
-        this.#store.next(z.array(planetSchema).parse(planets));
+        return z.array(planetSchema).parse(planets);
+      }),
+      tap((planets) => {
+        this.#patchState({ planets });
       }),
       catchError((err) => {
         if (err instanceof ZodError) {
@@ -71,31 +83,35 @@ export class PlanetsService {
         }
 
         return throwError(() => err);
-      })
+      }),
     );
   }
 
   setSearchTerm(term: string) {
-    this.#searchTerm.next(term);
+    this.#patchState({ searchTerm: term });
   }
 
   toggleRadiusDirection() {
-    this.#sortStore.next(this.#sortStore.getValue() === 'asc' ? 'desc' : 'asc');
+    this.#updateState((state) => {
+      return {
+        ...state,
+        sortDirection: state.sortDirection === 'asc' ? 'desc' : 'asc',
+      };
+    });
   }
 
   addPlanet(formData: FormData) {
     return this.#http.post<unknown>('/api/planets', formData).pipe(
       map((res) => {
-        const planet = planetSchema.parse(res);
-
-        this.#store.next([
-          ...this.#store.getValue(),
-          {
-            ...planet,
-          },
-        ]);
-
-        return planet;
+        return planetSchema.parse(res);
+      }),
+      tap((planet) => {
+        this.#updateState((state) => {
+          return {
+            ...state,
+            planets: [...state.planets, planet],
+          };
+        });
       }),
       catchError((err) => {
         if (err instanceof ZodError) {
@@ -103,7 +119,7 @@ export class PlanetsService {
         }
 
         return throwError(() => err);
-      })
+      }),
     );
   }
 
@@ -111,7 +127,14 @@ export class PlanetsService {
     return this.#http.get<unknown>(`/api/planets/${id}`).pipe(
       map((res) => {
         return planetSchema.parse(res);
-      })
+      }),
+      catchError((err) => {
+        if (err instanceof ZodError) {
+          return throwError(() => new Error('Invalid planet data received.'));
+        }
+
+        return throwError(() => err);
+      }),
     );
   }
 
@@ -121,22 +144,48 @@ export class PlanetsService {
         return planetSchema.parse(res);
       }),
       tap((updated) => {
-        return this.#store.next(
-          this.#store.getValue().map((planet) => {
-            return planet.id === id ? updated : planet;
-          })
-        );
-      })
+        this.#updateState((state) => {
+          return {
+            ...state,
+            planets: state.planets.map((planet) => {
+              return planet.id === id ? updated : planet;
+            }),
+          };
+        });
+      }),
+      catchError((err) => {
+        if (err instanceof ZodError) {
+          return throwError(() => new Error('Invalid planet data received.'));
+        }
+
+        return throwError(() => err);
+      }),
     );
   }
 
   deletePlanet(id: number) {
     return this.#http.delete<void>(`/api/planets/${id}`).pipe(
       tap(() => {
-        return this.#store.next(
-          this.#store.getValue().filter((p) => p.id !== id)
-        );
-      })
+        this.#updateState((state) => {
+          return {
+            ...state,
+            planets: state.planets.filter((p) => p.id !== id),
+          };
+        });
+      }),
     );
+  }
+
+  #patchState(patch: Partial<PlanetsState>) {
+    this.#updateState((state) => {
+      return {
+        ...state,
+        ...patch,
+      };
+    });
+  }
+
+  #updateState(updater: (state: PlanetsState) => PlanetsState) {
+    this.#store.next(updater(this.#store.getValue()));
   }
 }
