@@ -27,15 +27,17 @@ describe('NavbarComponent', () => {
         tableButton = fixture.debugElement.query(By.css('#table-button')).nativeElement;
     });
 
-    it('should activate grid view on grid button click', () => {
+    it('should activate grid view on grid button click', async () => {
         gridButton.click();
+        await fixture.whenStable();
 
         expect(gridButton.classList).toContain('text-bg-secondary');
         expect(tableButton.classList).not.toContain('text-bg-secondary');
     });
 
-    it('should activate table view on table button click', () => {
+    it('should activate table view on table button click', async () => {
         tableButton.click();
+        await fixture.whenStable();
 
         expect(tableButton.classList).toContain('text-bg-secondary');
         expect(gridButton.classList).not.toContain('text-bg-secondary');

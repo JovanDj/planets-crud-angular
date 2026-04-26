@@ -11,7 +11,6 @@ import { PlanetFormComponent } from '../planets/planet-form/planet-form.componen
 
 @Component({
   selector: 'app-navbar',
-  standalone: true,
   imports: [AsyncPipe, ReactiveFormsModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',

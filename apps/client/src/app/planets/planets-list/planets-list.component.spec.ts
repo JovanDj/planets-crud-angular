@@ -73,7 +73,7 @@ describe('PlanetsListComponent', () => {
         expect(images[1].nativeElement.src).toContain('mars.jpg');
     });
 
-    it('should render the correct sort icon based on input', () => {
+    it('should render the correct sort icon based on input', async () => {
         const arrowUp = fixture.debugElement.query(By.css('[data-testid="arrow-up"]'));
         const arrowDown = fixture.debugElement.query(By.css('[data-testid="arrow-down"]'));
 
@@ -85,7 +85,7 @@ describe('PlanetsListComponent', () => {
         component.sortDirection = 'asc';
         header.click();
 
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         expect(fixture.debugElement.query(By.css('[data-testid="arrow-down"]'))).toBeFalsy();
 

@@ -10,7 +10,6 @@ import { Planet } from '../planet.schema';
 
 @Component({
   selector: 'app-planet-detail',
-  standalone: true,
   imports: [AsyncPipe, DecimalPipe],
   templateUrl: './planet-detail.component.html',
   styleUrl: './planet-detail.component.scss',

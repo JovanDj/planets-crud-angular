@@ -69,38 +69,41 @@ describe('PlanetsComponent', () => {
         http.verify();
     });
 
-    it('should render planets table when view mode is set to "table"', () => {
+    it('should render planets table when view mode is set to "table"', async () => {
         tableButton.nativeElement.click();
+        await fixture.whenStable();
 
         const req = http.expectOne('/api/planets');
         expect(req.request.method).toBe('GET');
         req.flush([]);
 
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         const table = fixture.debugElement.query(By.css('#planets-table'));
         expect(table).toBeTruthy();
     });
 
-    it('should render planets grid when view mode is set to "grid"', () => {
+    it('should render planets grid when view mode is set to "grid"', async () => {
         gridButton.nativeElement.click();
+        await fixture.whenStable();
 
         const req = http.expectOne('/api/planets');
         expect(req.request.method).toBe('GET');
         req.flush([]);
 
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         const grid = fixture.debugElement.query(By.css('#planets-grid'));
         expect(grid).toBeTruthy();
     });
 
-    it('should toggle sort direction and update the arrow icon on click', () => {
+    it('should toggle sort direction and update the arrow icon on click', async () => {
         tableButton.nativeElement.click();
+        await fixture.whenStable();
 
         const req = http.expectOne('/api/planets');
         req.flush(planets);
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         const getPlanetNames = () => {
             return fixture.debugElement
@@ -118,7 +121,7 @@ describe('PlanetsComponent', () => {
 
         const header = fixture.debugElement.query(By.css("[data-testid='toggle-radius']"));
         header.nativeElement.click();
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         const arrowUp = fixture.debugElement.query(By.css("[data-testid='arrow-up']"));
         expect(arrowUp).toBeTruthy();
@@ -126,7 +129,7 @@ describe('PlanetsComponent', () => {
         expect(getPlanetNames()[0]).toBe('Mars');
 
         header.nativeElement.click();
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         const arrowDown = fixture.debugElement.query(By.css("[data-testid='arrow-down']"));
         expect(arrowDown).toBeTruthy();

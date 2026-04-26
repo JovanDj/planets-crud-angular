@@ -1,4 +1,10 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+  OnInit,
+} from '@angular/core';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -11,10 +17,10 @@ import { Planet } from '../planet.schema';
 
 @Component({
   selector: 'app-planet-form',
-  standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './planet-form.component.html',
   styleUrl: './planet-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlanetFormComponent implements OnInit {
   @Input()

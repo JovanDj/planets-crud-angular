@@ -1,23 +1,25 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting, } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { ActivatedRoute, convertToParamMap, provideRouter, } from '@angular/router';
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { PlanetDetailComponent } from './planet-detail.component';
-import { PlanetsService } from '../planets.service';
-import { ConfirmationService } from '../../shared/confirmation.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Planet } from '../planet.schema';
+import { NgbConfig, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { of } from 'rxjs';
 import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/confirmation-dialog.component';
+import { ConfirmationService } from '../../shared/confirmation.service';
+import { Planet } from '../planet.schema';
+import { PlanetsService } from '../planets.service';
+import { PlanetDetailComponent } from './planet-detail.component';
 
 const routeParams$ = of(convertToParamMap({ id: '1' }));
+
 
 describe('PlanetDetailComponent (strict behavioral)', () => {
     let fixture: ComponentFixture<PlanetDetailComponent>;
     let http: HttpTestingController;
+    let modal: NgbModal;
 
     const mockPlanet: Planet = {
         id: 1,
@@ -49,12 +51,17 @@ describe('PlanetDetailComponent (strict behavioral)', () => {
             ],
         }).compileComponents();
 
+        TestBed.inject(NgbConfig).animation = false;
+
         fixture = TestBed.createComponent(PlanetDetailComponent);
         http = TestBed.inject(HttpTestingController);
+        modal = TestBed.inject(NgbModal);
         fixture.autoDetectChanges();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        modal.dismissAll();
+        await fixture.whenStable();
         http.verify();
     });
 
@@ -66,12 +73,12 @@ describe('PlanetDetailComponent (strict behavioral)', () => {
         req.flush(mockPlanet);
     });
 
-    it('renders complete planet details after fetch', () => {
+    it('renders complete planet details after fetch', async () => {
         const req = http.expectOne('/api/planets/1');
         expect(req.request.method).toBe('GET');
 
         req.flush(mockPlanet);
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         const header = fixture.debugElement.query(By.css('h1')).nativeElement;
         const image = fixture.debugElement.query(By.css('img')).nativeElement;
@@ -91,7 +98,7 @@ describe('PlanetDetailComponent (strict behavioral)', () => {
         const req = http.expectOne('/api/planets/1');
         req.flush(mockPlanet);
 
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         const editButton = fixture.debugElement.query(By.css('button.btn-outline-secondary'));
         editButton.triggerEventHandler('click');
@@ -104,15 +111,20 @@ describe('PlanetDetailComponent (strict behavioral)', () => {
         const req = http.expectOne('/api/planets/1');
 
         req.flush(mockPlanet);
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         const deleteButton = fixture.debugElement.query(By.css('button.btn-primary'));
 
         deleteButton.triggerEventHandler('click');
 
-        const modalConfirmButton = fixture.debugElement.query(By.css('.modal-footer #confirm-button'));
+        await fixture.whenStable();
 
-        modalConfirmButton.triggerEventHandler('click');
+        const modalConfirmButton = document.querySelector<HTMLButtonElement>(
+            '.modal-footer #confirm-button'
+        );
+
+        expect(modalConfirmButton).toBeTruthy();
+        modalConfirmButton?.click();
 
         await fixture.whenStable();
 
@@ -120,13 +132,13 @@ describe('PlanetDetailComponent (strict behavioral)', () => {
         expect(deleteReq.request.method).toBe('DELETE');
 
         deleteReq.flush({});
-        fixture.detectChanges();
+        await fixture.whenStable();
     });
 
     it('preserves visual structure after sequential Edit and Delete', async () => {
         const req = http.expectOne('/api/planets/1');
         req.flush(mockPlanet);
-        fixture.detectChanges();
+        await fixture.whenStable();
 
         const editButton = fixture.debugElement.query(By.css('button.btn-outline-secondary'));
         const deleteButton = fixture.debugElement.query(By.css('button.btn-primary'));

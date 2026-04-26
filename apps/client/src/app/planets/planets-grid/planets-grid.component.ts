@@ -4,7 +4,6 @@ import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-planets-grid',
-  standalone: true,
   imports: [DecimalPipe],
   templateUrl: './planets-grid.component.html',
   styleUrl: './planets-grid.component.scss',

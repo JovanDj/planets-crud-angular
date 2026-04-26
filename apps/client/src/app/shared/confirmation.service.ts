@@ -11,7 +11,7 @@ export class ConfirmationService {
   confirm(action: 'CREATE' | 'EDIT' | 'DELETE', itemName: string) {
     const modalRef = this.#modal.open(ConfirmationDialogComponent, {
       centered: true,
-      container: '.card',
+      container: 'body',
     });
 
     switch (action) {

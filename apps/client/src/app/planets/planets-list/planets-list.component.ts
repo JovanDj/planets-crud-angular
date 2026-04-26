@@ -12,7 +12,6 @@ import { SortDirection } from '../planets.service';
 
 @Component({
   selector: 'app-planets-list',
-  standalone: true,
   templateUrl: './planets-list.component.html',
   styleUrl: './planets-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

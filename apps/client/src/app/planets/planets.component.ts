@@ -12,7 +12,6 @@ import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
   selector: 'app-planets',
-  standalone: true,
   imports: [
     PlanetsListComponent,
     PlanetsGridComponent,
